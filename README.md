@@ -1,49 +1,44 @@
-# My Simple Game Engine
+# Modular 3D Game Engine
 
-This is a simple data-driven game engine that uses `three.js` to render a 3D scene. The engine is designed to be easily extensible and is configured using a `game.json` file.
+This project is a modular 3D game engine built with three.js. It allows for creating and managing game scenes, objects, and behaviors through a flexible, data-driven architecture.
 
-## How to Run
+## Features
 
-1.  You need a local web server to run this project due to browser security restrictions on loading files directly from the filesystem. A simple way to do this is to use Python's built-in HTTP server.
-    *   If you have Python 3, run `python -m http.server` in the root directory of the project.
-    *   If you have Python 2, run `python -m SimpleHTTPServer` in the root directory of the project.
-2.  Open your web browser and navigate to `http://localhost:8000`.
+- **Scene Configuration**: Define your game world using a simple `game.json` file, specifying objects, materials, and their properties.
+- **Modular Engine**: The engine is broken down into logical modules for scene loading, script management, and the game loop, making it easy to extend and maintain.
+- **Custom Scripts**: Attach custom behaviors to any game object, including the camera, by creating simple JavaScript modules.
+- **Flexible Camera**: Configure the camera in `game.json` and attach scripts to it for dynamic behaviors like following a target.
 
-## `game.json` Documentation
+## Getting Started
 
-The `game.json` file defines the scene and the objects within it.
+To run the project, simply open the `index.html` file in a web browser.
+
+## How to Use
 
 ### Scene Configuration
 
-The `scene` object has the following properties:
+The `game.json` file is the heart of your game. Here's a breakdown of its structure:
 
-*   `background`: The background color of the scene, specified as a hexadecimal string (e.g., `"0xaaaaaa"`).
+- **`scene`**: Defines global scene properties, such as the background color.
+- **`camera`**: Configures the main camera, including its type, field of view (FOV), and position. You can also attach scripts to the camera.
+- **`objects`**: An array of game objects, each with its own geometry, material, position, and scripts.
 
-### Object Configuration
+### Creating Custom Scripts
 
-The `objects` array contains a list of game objects. Each object has the following properties:
+To create a custom behavior, add a new JavaScript file to the `js/scripts/` directory. Each script must export a default object containing `init` and/or `update` methods:
 
-*   `name`: A unique name for the object.
-*   `type`: The type of the object. Currently, only `"Mesh"` is supported.
-*   `geometry`: An object that defines the geometry of the mesh.
-    *   `type`: The type of geometry (e.g., `"BoxGeometry"`). This should correspond to a `three.js` geometry class.
-    *   `width`, `height`, `depth`: The dimensions of the geometry.
-*   `material`: An object that defines the material of the mesh.
-    *   `type`: The type of material (e.g., `"MeshPhongMaterial"`). This should correspond to a `three.js` material class.
-    *   `color`: The color of the material, specified as a hexadecimal string.
-*   `position`: An object with `x`, `y`, and `z` properties that define the initial position of the object.
-*   `scripts`: An array of scripts to be attached to the object.
+- **`init(object, scene, params)`**: Called once when the script is first loaded. Use it for one-time setup.
+- **`update(object, deltaTime, keyboardState, scene, params)`**: Called on every frame. Use it for continuous behaviors.
 
-### Scripts
+To attach a script to an object, add it to the `scripts` array in `game.json`:
 
-Scripts add behavior to game objects.
+```json
+"scripts": [
+  {
+    "type": "your-script-name",
+    "some_param": "some_value"
+  }
+]
+```
 
-*   **`gravity`**: Applies a constant downward force to the object.
-    *   `type`: `"gravity"`
-*   **`horizontalMovement`**: Moves the object back and forth along the x-axis.
-    *   `type`: `"horizontalMovement"`
-    *   `speed`: (Optional) The speed of the movement. Defaults to `1`.
-    *   `range`: (Optional) The range of the movement. Defaults to `1`.
-*   **`keyboardInput`**: Moves the object based on keyboard input (arrow keys).
-    *   `type`: `"keyboardInput"`
-    *   `speed`: (Optional) The speed of the movement. Defaults to `2`.
+The engine will automatically load and execute the script. The filename (without the `.js` extension) is used as the `type`. Any additional properties in the script configuration will be passed to the `init` and `update` functions as the `params` object.
