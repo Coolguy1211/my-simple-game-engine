@@ -18,7 +18,36 @@
       },
       "position": {
         "x": 0,
-        "y": 0,
+        "y": 2,
+        "z": 0
+      },
+      "scripts": [
+        {
+          "type": "gravity"
+        },
+        {
+          "type": "horizontalMovement",
+          "speed": 0.01,
+          "range": 2
+        }
+      ]
+    },
+    {
+      "name": "floor",
+      "type": "Mesh",
+      "geometry": {
+        "type": "BoxGeometry",
+        "width": 10,
+        "height": 0.5,
+        "depth": 10
+      },
+      "material": {
+        "type": "MeshPhongMaterial",
+        "color": "0x888888"
+      },
+      "position": {
+        "x": 0,
+        "y": -2,
         "z": 0
       }
     }
