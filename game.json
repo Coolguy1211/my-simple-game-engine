@@ -1,0 +1,26 @@
+{
+  "scene": {
+    "background": "0xaaaaaa"
+  },
+  "objects": [
+    {
+      "name": "main_cube",
+      "type": "Mesh",
+      "geometry": {
+        "type": "BoxGeometry",
+        "width": 1,
+        "height": 1,
+        "depth": 1
+      },
+      "material": {
+        "type": "MeshPhongMaterial",
+        "color": "0x44aa88"
+      },
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    }
+  ]
+}
