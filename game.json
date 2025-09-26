@@ -26,9 +26,8 @@
           "type": "gravity"
         },
         {
-          "type": "horizontalMovement",
-          "speed": 0.01,
-          "range": 2
+          "type": "keyboardInput",
+          "speed": 5
         }
       ]
     },
