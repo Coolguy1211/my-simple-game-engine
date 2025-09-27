@@ -1,0 +1,92 @@
+{
+  "scene": {
+    "background": "0x101010",
+    "skybox": [
+      "https://threejs.org/examples/textures/cube/pisa/px.png",
+      "https://threejs.org/examples/textures/cube/pisa/nx.png",
+      "https://threejs.org/examples/textures/cube/pisa/py.png",
+      "https://threejs.org/examples/textures/cube/pisa/ny.png",
+      "https://threejs.org/examples/textures/cube/pisa/pz.png",
+      "https://threejs.org/examples/textures/cube/pisa/nz.png"
+    ]
+  },
+  "camera": {
+    "type": "PerspectiveCamera",
+    "fov": 75,
+    "near": 0.1,
+    "far": 1000,
+    "position": {
+      "x": 0,
+      "y": 5,
+      "z": 10
+    },
+    "scripts": [
+      {
+        "type": "camera-follow",
+        "target": "player_character",
+        "smooth_speed": 0.125
+      }
+    ]
+  },
+  "lights": [
+    {
+      "type": "AmbientLight",
+      "color": "0x404040",
+      "intensity": 2
+    },
+    {
+      "type": "DirectionalLight",
+      "color": "0xffffff",
+      "intensity": 1,
+      "position": {
+        "x": -1,
+        "y": 2,
+        "z": 4
+      }
+    }
+  ],
+  "objects": [
+    {
+      "name": "player_character",
+      "model": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb",
+      "position": {
+        "x": 0,
+        "y": 2,
+        "z": 0
+      },
+      "scripts": [
+        {
+          "type": "gravity"
+        },
+        {
+          "type": "keyboard-input"
+        },
+        {
+          "type": "AudioSource",
+          "src": "https://cdn.jsdelivr.net/gh/jules-labs/testing-files@main/quack.mp3",
+          "volume": 0.5
+        }
+      ]
+    },
+    {
+      "name": "floor",
+      "type": "Mesh",
+      "geometry": {
+        "type": "BoxGeometry",
+        "width": 10,
+        "height": 0.5,
+        "depth": 10
+      },
+      "material": {
+        "type": "MeshPhongMaterial",
+        "color": "0xffffff",
+        "map": "https://threejs.org/examples/textures/checker.png"
+      },
+      "position": {
+        "x": 0,
+        "y": -2,
+        "z": 0
+      }
+    }
+  ]
+}
