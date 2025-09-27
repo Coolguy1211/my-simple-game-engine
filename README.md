@@ -1,44 +1,75 @@
-# Modular 3D Game Engine
+Modular 3D Game Engine
 
-This project is a modular 3D game engine built with three.js. It allows for creating and managing game scenes, objects, and behaviors through a flexible, data-driven architecture.
+A modular, data-driven 3D game engine built with Three.js.
+It enables creating and managing scenes, objects, and behaviors using a flexible component-based architecture and JSON configuration files.
 
-## Features
+✨ Features
+Scene Configuration
 
-- **Scene Configuration**: Define your game world using a simple `game.json` file, specifying objects, materials, and their properties.
-- **Modular Engine**: The engine is broken down into logical modules for scene loading, script management, and the game loop, making it easy to extend and maintain.
-- **Custom Scripts**: Attach custom behaviors to any game object, including the camera, by creating simple JavaScript modules.
-- **Flexible Camera**: Configure the camera in `game.json` and attach scripts to it for dynamic behaviors like following a target.
+Define your game world using a game.json file.
 
-## Getting Started
+Supports cameras, lights, glTF models, materials, textures, and skyboxes.
 
-To run the project, simply open the `index.html` file in a web browser.
+Modular Engine
 
-## How to Use
+GameObject / Component System with lifecycle hooks:
 
-### Scene Configuration
+onStart → initialization
 
-The `game.json` file is the heart of your game. Here's a breakdown of its structure:
+update → per-frame logic
 
-- **`scene`**: Defines global scene properties, such as the background color.
-- **`camera`**: Configures the main camera, including its type, field of view (FOV), and position. You can also attach scripts to the camera.
-- **`objects`**: An array of game objects, each with its own geometry, material, position, and scripts.
+onDestroy → cleanup
 
-### Creating Custom Scripts
+Components are reusable, flexible, and data-driven.
 
-To create a custom behavior, add a new JavaScript file to the `js/scripts/` directory. Each script must export a default object containing `init` and/or `update` methods:
+Scene Management
 
-- **`init(object, scene, params)`**: Called once when the script is first loaded. Use it for one-time setup.
-- **`update(object, deltaTime, keyboardState, scene, params)`**: Called on every frame. Use it for continuous behaviors.
+SceneManager allows loading and switching between multiple JSON-defined scenes.
 
-To attach a script to an object, add it to the `scripts` array in `game.json`:
+scene-loader builds environments from configuration objects.
 
-```json
-"scripts": [
-  {
-    "type": "your-script-name",
-    "some_param": "some_value"
-  }
-]
-```
+Core Managers
 
+InputManager → keyboard and mouse input.
+
+AudioManager → positional audio loading & playback.
+
+TimeManager → play, pause, stop simulation states.
+
+DebugManager → toggleable debug visuals like bounding boxes.
+
+EventBus → decoupled global event communication.
+
+Data-Driven Loading
+
+JSON-defined assets for cameras, lights, objects, and environments.
+
+No hardcoded elements—scenes are entirely configurable.
+
+Skybox Support
+
+Immersive 3D backgrounds for realistic environments.
+
+🚀 Development Roadmap
+✅ Phase 1 – Foundational Architecture (Completed)
+
+Established the component-based system.
+
+Implemented scene management and data-driven loading.
+
+Added core managers for input, audio, time, debug, and events.
+
+Enabled skybox support for richer worlds.
+
+🔜 Phase 2 – Next Steps
+
+Physics engine integration.
+
+Networking & multiplayer support.
+
+Advanced rendering (shadows, PBR materials).
+
+Plugin ecosystem for extending engine functionality.
+
+📂 Example Scene Configuration
 The engine will automatically load and execute the script. The filename (without the `.js` extension) is used as the `type`. Any additional properties in the script configuration will be passed to the `init` and `update` functions as the `params` object.
