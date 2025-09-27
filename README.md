@@ -1,75 +1,123 @@
-Modular 3D Game Engine
+# Modular 3D Game Engine
 
-A modular, data-driven 3D game engine built with Three.js.
-It enables creating and managing scenes, objects, and behaviors using a flexible component-based architecture and JSON configuration files.
+A modular, data-driven 3D game engine built with Three.js. It enables creating and managing scenes, objects, and behaviors using a flexible component-based architecture and JSON configuration files.
 
-✨ Features
-Scene Configuration
+## 🚀 Getting Started
 
-Define your game world using a game.json file.
+This project is built with standard web technologies and requires no complex installation or build process. All you need is a local web server to run it.
 
-Supports cameras, lights, glTF models, materials, textures, and skyboxes.
+### Prerequisites
 
-Modular Engine
+- A modern web browser that supports ES modules.
+- A local web server.
 
-GameObject / Component System with lifecycle hooks:
+### Installation
 
-onStart → initialization
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-username/your-repo-name.git
+    cd your-repo-name
+    ```
 
-update → per-frame logic
+2.  **Run a local web server:**
 
-onDestroy → cleanup
+    If you have Python 3 installed, you can use its built-in HTTP server:
+    ```bash
+    python -m http.server
+    ```
 
-Components are reusable, flexible, and data-driven.
+    Alternatively, you can use other tools like `live-server` for Node.js:
+    ```bash
+    npx live-server
+    ```
 
-Scene Management
+3.  **Open your browser:**
 
-SceneManager allows loading and switching between multiple JSON-defined scenes.
+    Navigate to `http://localhost:8000` (or the port your server is running on) to see the engine in action.
 
-scene-loader builds environments from configuration objects.
+## Usage
 
-Core Managers
+To create a new scene, you simply need to create a new JSON file in the `scenes/` directory. The engine will automatically load the scene specified in `js/engine/main.js`. By default, this is `level-1.json`.
 
-InputManager → keyboard and mouse input.
+### Scene Configuration
 
-AudioManager → positional audio loading & playback.
+Here is an example of a complete scene configuration from `scenes/level-1.json`:
 
-TimeManager → play, pause, stop simulation states.
+```json
+{
+  "scene": {
+    "background": "0x101010",
+    "skybox": [
+      "https://threejs.org/examples/textures/cube/pisa/px.png",
+      "https://threejs.org/examples/textures/cube/pisa/nx.png",
+      "https://threejs.org/examples/textures/cube/pisa/py.png",
+      "https://threejs.org/examples/textures/cube/pisa/ny.png",
+      "https://threejs.org/examples/textures/cube/pisa/pz.png",
+      "https://threejs.org/examples/textures/cube/pisa/nz.png"
+    ]
+  },
+  "camera": {
+    "type": "PerspectiveCamera",
+    "fov": 75,
+    "near": 0.1,
+    "far": 1000,
+    "position": { "x": 0, "y": 5, "z": 10 },
+    "scripts": [
+      {
+        "type": "camera-follow",
+        "target": "player_character",
+        "smooth_speed": 0.125
+      }
+    ]
+  },
+  "lights": [
+    { "type": "AmbientLight", "color": "0x404040", "intensity": 2 },
+    { "type": "DirectionalLight", "color": "0xffffff", "intensity": 1, "position": { "x": -1, "y": 2, "z": 4 } }
+  ],
+  "objects": [
+    {
+      "name": "player_character",
+      "model": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb",
+      "position": { "x": 0, "y": 2, "z": 0 },
+      "scripts": [
+        { "type": "gravity" },
+        { "type": "keyboard-input" },
+        { "type": "AudioSource", "src": "https://cdn.jsdelivr.net/gh/jules-labs/testing-files@main/quack.mp3", "volume": 0.5 }
+      ]
+    },
+    {
+      "name": "floor",
+      "type": "Mesh",
+      "geometry": { "type": "BoxGeometry", "width": 10, "height": 0.5, "depth": 10 },
+      "material": { "type": "MeshPhongMaterial", "color": "0xffffff", "map": "https://threejs.org/examples/textures/checker.png" },
+      "position": { "x": 0, "y": -2, "z": 0 }
+    }
+  ]
+}
+```
 
-DebugManager → toggleable debug visuals like bounding boxes.
+## ✨ Features
 
-EventBus → decoupled global event communication.
+- **Scene Configuration:** Define your game world using JSON files. Supports cameras, lights, glTF models, materials, textures, and skyboxes.
+- **Modular Engine:** A `GameObject` / `Component` system with lifecycle hooks (`onStart`, `update`, `onDestroy`).
+- **Scene Management:** The `SceneManager` allows for loading and switching between multiple JSON-defined scenes.
+- **Core Managers:** Includes managers for input, audio, time, debugging, and a global event bus.
+- **Data-Driven Loading:** No hardcoded elements—scenes are entirely configurable.
+- **Skybox Support:** Immersive 3D backgrounds for realistic environments.
 
-Data-Driven Loading
+## Roadmap
 
-JSON-defined assets for cameras, lights, objects, and environments.
+- **Phase 1 – Foundational Architecture (Completed)**
+  - Established the component-based system.
+  - Implemented scene management and data-driven loading.
+  - Added core managers for input, audio, time, debug, and events.
+  - Enabled skybox support for richer worlds.
+- **Phase 2 – Next Steps**
+  - Physics engine integration.
+  - Networking & multiplayer support.
+  - Advanced rendering (shadows, PBR materials).
+  - Plugin ecosystem for extending engine functionality.
 
-No hardcoded elements—scenes are entirely configurable.
+## 📜 License
 
-Skybox Support
-
-Immersive 3D backgrounds for realistic environments.
-
-🚀 Development Roadmap
-✅ Phase 1 – Foundational Architecture (Completed)
-
-Established the component-based system.
-
-Implemented scene management and data-driven loading.
-
-Added core managers for input, audio, time, debug, and events.
-
-Enabled skybox support for richer worlds.
-
-🔜 Phase 2 – Next Steps
-
-Physics engine integration.
-
-Networking & multiplayer support.
-
-Advanced rendering (shadows, PBR materials).
-
-Plugin ecosystem for extending engine functionality.
-
-📂 Example Scene Configuration
-The engine will automatically load and execute the script. The filename (without the `.js` extension) is used as the `type`. Any additional properties in the script configuration will be passed to the `init` and `update` functions as the `params` object.
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
