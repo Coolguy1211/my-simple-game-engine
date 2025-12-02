@@ -96,6 +96,31 @@ Here is an example of a complete scene configuration from `scenes/level-1.json`:
 }
 ```
 
+### Inline Scripts
+
+In addition to loading scripts from external files, you can define them directly within your scene's JSON file. This is useful for small, unique behaviors that don't require a separate file.
+
+To create an inline script, use the `source` property instead of `type`. The value of `source` should be a string containing a JavaScript class definition. This class must have `onStart`, `update`, and/or `onDestroy` methods, just like a file-based script.
+
+Here is an example of an object with an inline script that makes it rotate:
+
+```json
+{
+  "name": "rotator",
+  "type": "Mesh",
+  "geometry": { "type": "BoxGeometry", "width": 1, "height": 1, "depth": 1 },
+  "material": { "type": "MeshPhongMaterial", "color": "0x00ff00" },
+  "position": { "x": 2, "y": 0, "z": -2 },
+  "scripts": [
+    {
+      "source": "class { onStart() { console.log('Inline script started!'); } update(dt) { this.gameObject.transform.rotation.y += dt; } }"
+    }
+  ]
+}
+```
+
+> **Note:** Inline scripts are executed using `new Function()`, which has security implications. Only use scene files from trusted sources.
+
 ## ✨ Features
 
 - **Scene Configuration:** Define your game world using JSON files. Supports cameras, lights, glTF models, materials, textures, and skyboxes.
