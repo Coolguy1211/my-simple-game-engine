@@ -87,6 +87,18 @@
         "y": -2,
         "z": 0
       }
+    },
+    {
+      "name": "rotator",
+      "type": "Mesh",
+      "geometry": { "type": "BoxGeometry", "width": 1, "height": 1, "depth": 1 },
+      "material": { "type": "MeshPhongMaterial", "color": "0x00ff00" },
+      "position": { "x": 2, "y": 0, "z": -2 },
+      "scripts": [
+        {
+          "source": "class { onStart() { console.log('Inline script started!'); } update(dt) { this.gameObject.transform.rotation.y += dt; } }"
+        }
+      ]
     }
   ]
 }
