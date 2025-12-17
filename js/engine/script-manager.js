@@ -12,6 +12,11 @@ export async function loadScripts(scriptConfigs) {
 
             if (source) {
                 // WARNING: Executes code from JSON. Only use with trusted scene data.
+                console.warn(
+                    'SECURITY WARNING: An inline script is being executed. ' +
+                    'This is a potential security risk if the scene file is from an untrusted source. ' +
+                    'Avoid using inline scripts in production environments.'
+                );
                 // If a 'source' property exists, create the class from the string
                 ComponentClass = new Function(`return (${source})`)();
             } else if (type) {
