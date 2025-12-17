@@ -1,0 +1,3 @@
+## 2024-07-23 - Game Loop Array Filtering
+**Learning:** In high-frequency loops, such as a game engine's main loop, using array methods like `.filter()` causes a new array to be allocated on every iteration. This frequent memory allocation puts significant pressure on the garbage collector (GC), which can lead to unpredictable pauses and frame rate stutter.
+**Action:** For performance-critical loops that modify arrays, I will use in-place mutation techniques. A reverse `for` loop combined with `.splice()` is a highly efficient pattern for removing items without allocating new memory and without skipping elements during iteration.
