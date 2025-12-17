@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import SceneManager from './SceneManager.js';
+import { displayError } from './ui/error-display.js';
 import AudioManager from './AudioManager.js';
 import TimeManager from './TimeManager.js';
 import { createGameLoop } from './game-loop.js';
@@ -16,6 +17,7 @@ async function main() {
         await SceneManager.loadScene('level-1');
     } catch (error) {
         console.error("Failed to load the initial scene. The application cannot start.", error);
+        displayError('Failed to Load Scene', 'The initial scene could not be loaded. Please check the console for more details and try refreshing the page.');
         return;
     }
 
