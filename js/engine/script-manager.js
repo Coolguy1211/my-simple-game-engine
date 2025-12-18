@@ -1,3 +1,6 @@
+// ⚡ Bolt: Cache for compiled inline scripts to avoid expensive recompilation.
+const inlineScriptCache = new Map();
+
 /**
  * Dynamically loads and instantiates script components based on configuration.
  * @param {Array<Object>} scriptConfigs - An array of script configurations.
@@ -11,14 +14,23 @@ export async function loadScripts(scriptConfigs) {
             let ComponentClass;
 
             if (source) {
-                // WARNING: Executes code from JSON. Only use with trusted scene data.
-                console.warn(
-                    'SECURITY WARNING: An inline script is being executed. ' +
-                    'This is a potential security risk if the scene file is from an untrusted source. ' +
-                    'Avoid using inline scripts in production environments.'
-                );
-                // If a 'source' property exists, create the class from the string
-                ComponentClass = new Function(`return (${source})`)();
+                // ⚡ Bolt: Check the cache before compiling the inline script.
+                if (inlineScriptCache.has(source)) {
+                    // If the script is already compiled and cached, reuse it.
+                    ComponentClass = inlineScriptCache.get(source);
+                } else {
+                    // WARNING: Executes code from JSON. Only use with trusted scene data.
+                    console.warn(
+                        'SECURITY WARNING: An inline script is being executed. ' +
+                        'This is a potential security risk if the scene file is from an untrusted source. ' +
+                        'Avoid using inline scripts in production environments.'
+                    );
+                    // If a 'source' property exists, create the class from the string.
+                    // This is a performance-intensive operation.
+                    ComponentClass = new Function(`return (${source})`)();
+                    // Cache the compiled class to avoid recompiling it in the future.
+                    inlineScriptCache.set(source, ComponentClass);
+                }
             } else if (type) {
                 // Otherwise, load from an external file
                 const module = await import(`../scripts/${type}.js`);
