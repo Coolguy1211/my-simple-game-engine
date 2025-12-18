@@ -43,11 +43,45 @@ export function displayError(title, message) {
     messageElement.style.color = '#333';
     messageElement.style.lineHeight = '1.5';
 
+    // Create a close button
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '×';
+    closeButton.setAttribute('aria-label', 'Close dialog');
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '10px';
+    closeButton.style.background = 'transparent';
+    closeButton.style.border = 'none';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.cursor = 'pointer';
+
+    // Function to close the overlay
+    function closeOverlay() {
+        document.body.removeChild(overlay);
+        document.removeEventListener('keydown', handleKeyDown);
+    }
+
+    // Event listener for the close button
+    closeButton.addEventListener('click', closeOverlay);
+
+    // Event listener for the Escape key
+    function handleKeyDown(event) {
+        if (event.key === 'Escape') {
+            closeOverlay();
+        }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+
     // Assemble the elements
     messageBox.appendChild(titleElement);
     messageBox.appendChild(messageElement);
+    messageBox.appendChild(closeButton);
     overlay.appendChild(messageBox);
 
     // Add to the body
     document.body.appendChild(overlay);
+
+    // Focus the close button for accessibility
+    closeButton.focus();
 }
