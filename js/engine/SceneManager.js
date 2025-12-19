@@ -61,6 +61,11 @@ class SceneManager {
             scene.gameObjects = loadedData.gameObjects;
             scene.isLoaded = true;
 
+            // Initialize all game objects now that the scene is ready
+            for (const go of scene.gameObjects) {
+                go.onStart(scene);
+            }
+
             this.activeScene = scene;
             console.log(`Scene "${name}" loaded successfully.`);
 
