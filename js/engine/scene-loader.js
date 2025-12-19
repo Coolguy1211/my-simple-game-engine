@@ -121,8 +121,5 @@ export async function loadSceneFromConfig(gameConfig) {
     const cameraGO = await loadCamera(scene, gameConfig.camera);
     const gameObjects = await loadGameObjects(scene, gameConfig.objects || []);
     const allGameObjects = [cameraGO, ...gameObjects];
-    for (const go of allGameObjects) {
-        go.onStart(scene);
-    }
     return { scene, camera: cameraGO.transform, gameObjects: allGameObjects };
 }
