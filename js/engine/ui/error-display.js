@@ -23,12 +23,25 @@ export function displayError(title, message) {
 
     // Create the message box
     const messageBox = document.createElement('div');
+    messageBox.style.position = 'relative';
     messageBox.style.backgroundColor = '#fff';
     messageBox.style.padding = '20px 40px';
     messageBox.style.borderRadius = '8px';
     messageBox.style.maxWidth = '500px';
     messageBox.style.textAlign = 'center';
     messageBox.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+
+    // Create a close button
+    const closeButton = document.createElement('button');
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '10px';
+    closeButton.style.background = 'transparent';
+    closeButton.style.border = 'none';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.setAttribute('aria-label', 'Close');
+    closeButton.innerHTML = '&times;';
 
     // Create the title element
     const titleElement = document.createElement('h2');
@@ -44,9 +57,27 @@ export function displayError(title, message) {
     messageElement.style.lineHeight = '1.5';
 
     // Assemble the elements
+    messageBox.appendChild(closeButton);
     messageBox.appendChild(titleElement);
     messageBox.appendChild(messageElement);
     overlay.appendChild(messageBox);
+
+    // Function to close the overlay
+    const closeOverlay = () => {
+        document.body.removeChild(overlay);
+        document.removeEventListener('keydown', handleEsc);
+    };
+
+    // Event listener for the close button
+    closeButton.addEventListener('click', closeOverlay);
+
+    // Event listener for the 'Escape' key
+    const handleEsc = (event) => {
+        if (event.key === 'Escape') {
+            closeOverlay();
+        }
+    };
+    document.addEventListener('keydown', handleEsc);
 
     // Add to the body
     document.body.appendChild(overlay);
