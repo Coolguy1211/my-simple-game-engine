@@ -11,20 +11,16 @@ export async function loadScripts(scriptConfigs) {
             let ComponentClass;
 
             if (source) {
-                // WARNING: Executes code from JSON. Only use with trusted scene data.
-                console.warn(
-                    'SECURITY WARNING: An inline script is being executed. ' +
-                    'This is a potential security risk if the scene file is from an untrusted source. ' +
-                    'Avoid using inline scripts in production environments.'
-                );
-                // If a 'source' property exists, create the class from the string
-                ComponentClass = new Function(`return (${source})`)();
-            } else if (type) {
-                // Otherwise, load from an external file
+                // Inline scripts are disabled due to security risks.
+                throw new Error('Inline scripts are not supported. Use file-based scripts instead.');
+            }
+
+            if (type) {
+                // Load from an external file
                 const module = await import(`../scripts/${type}.js`);
                 ComponentClass = module.default;
             } else {
-                throw new Error('Script configuration must have a type or source.');
+                throw new Error('Script configuration must have a `type`.');
             }
 
             if (typeof ComponentClass !== 'function') {
