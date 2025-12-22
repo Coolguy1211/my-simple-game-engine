@@ -5,10 +5,37 @@
 		<title>My first three.js app</title>
 		<style>
 			body { margin: 0; }
+			.skip-to-content {
+				position: absolute;
+				left: -10000px;
+				top: auto;
+				width: 1px;
+				height: 1px;
+				overflow: hidden;
+			}
+			.skip-to-content:focus {
+				position: absolute;
+				top: 10px;
+				left: 10px;
+				z-index: 1001;
+				padding: 12px 16px;
+				background-color: #f0f0f0;
+				color: #333;
+				border: 1px solid #ccc;
+				border-radius: 4px;
+				text-decoration: none;
+				font-family: sans-serif;
+				width: auto;
+				height: auto;
+				overflow: visible;
+			}
 		</style>
 	</head>
 	<body>
-        <canvas id="c"></canvas>
+		<a href="#main-content" class="skip-to-content">Skip to content</a>
+		<main id="main-content">
+			<canvas id="c"></canvas>
+		</main>
 		<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 		<script type="importmap">
 			{
