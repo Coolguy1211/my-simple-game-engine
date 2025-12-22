@@ -61,8 +61,15 @@ export function createGameLoop(renderer, canvas) {
             // Update the debug manager to sync visualizations
             DebugManager.update();
 
-            // Clean up destroyed objects
-            activeScene.gameObjects = activeScene.gameObjects.filter(go => !go.isDestroyed);
+            // Clean up destroyed objects.
+            // Looping backwards is more efficient because we can remove items from the array
+            // without worrying about the loop's index getting out of sync. This avoids the
+            // performance penalty of creating a new array every frame with .filter().
+            for (let i = activeScene.gameObjects.length - 1; i >= 0; i--) {
+                if (activeScene.gameObjects[i].isDestroyed) {
+                    activeScene.gameObjects.splice(i, 1);
+                }
+            }
         }
 
         // Update the input manager at the end of every frame, regardless of pause state.
