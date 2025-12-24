@@ -61,8 +61,23 @@ export function createGameLoop(renderer, canvas) {
             // Update the debug manager to sync visualizations
             DebugManager.update();
 
-            // Clean up destroyed objects
-            activeScene.gameObjects = activeScene.gameObjects.filter(go => !go.isDestroyed);
+            // ⚡ Bolt: In-place removal of destroyed objects
+            // The previous implementation used Array.prototype.filter(), which created a new
+            // array on every frame. This is a performance anti-pattern as it leads to
+            // unnecessary memory allocation and garbage collection pressure.
+            //
+            // By iterating backwards and using splice(), we can remove items from the
+            // array in-place, which is significantly more performant. A reverse loop is
+            // crucial to avoid index shifting issues that would occur with a forward loop
+            // when an item is removed.
+            //
+            // Expected Impact: Reduced memory churn and fewer GC pauses, leading to a
+            // smoother frame rate, especially in scenes with many short-lived objects.
+            for (let i = activeScene.gameObjects.length - 1; i >= 0; i--) {
+                if (activeScene.gameObjects[i].isDestroyed) {
+                    activeScene.gameObjects.splice(i, 1);
+                }
+            }
         }
 
         // Update the input manager at the end of every frame, regardless of pause state.
