@@ -29,6 +29,7 @@ export function displayError(title, message) {
     messageBox.style.maxWidth = '500px';
     messageBox.style.textAlign = 'center';
     messageBox.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+    messageBox.style.position = 'relative'; // For positioning the close button
 
     // Create the title element
     const titleElement = document.createElement('h2');
@@ -43,10 +44,40 @@ export function displayError(title, message) {
     messageElement.style.color = '#333';
     messageElement.style.lineHeight = '1.5';
 
+    // Create the close button
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '×';
+    closeButton.setAttribute('aria-label', 'Close');
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '10px';
+    closeButton.style.background = 'transparent';
+    closeButton.style.border = 'none';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.cursor = 'pointer';
+
     // Assemble the elements
     messageBox.appendChild(titleElement);
     messageBox.appendChild(messageElement);
+    messageBox.appendChild(closeButton);
     overlay.appendChild(messageBox);
+
+    // Function to close the modal
+    function closeModal() {
+        document.body.removeChild(overlay);
+        document.removeEventListener('keydown', handleEscKey);
+    }
+
+    // Handler for the Escape key
+    function handleEscKey(event) {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    }
+
+    // Add event listeners
+    closeButton.addEventListener('click', closeModal);
+    document.addEventListener('keydown', handleEscKey);
 
     // Add to the body
     document.body.appendChild(overlay);
