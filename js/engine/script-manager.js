@@ -5,26 +5,17 @@
  */
 export async function loadScripts(scriptConfigs) {
     const components = await Promise.all(scriptConfigs.map(async (config) => {
-        const { type, source, ...params } = config;
+        const { type, ...params } = config;
 
         try {
             let ComponentClass;
 
-            if (source) {
-                // WARNING: Executes code from JSON. Only use with trusted scene data.
-                console.warn(
-                    'SECURITY WARNING: An inline script is being executed. ' +
-                    'This is a potential security risk if the scene file is from an untrusted source. ' +
-                    'Avoid using inline scripts in production environments.'
-                );
-                // If a 'source' property exists, create the class from the string
-                ComponentClass = new Function(`return (${source})`)();
-            } else if (type) {
-                // Otherwise, load from an external file
+            if (type) {
+                // Load from an external file
                 const module = await import(`../scripts/${type}.js`);
                 ComponentClass = module.default;
             } else {
-                throw new Error('Script configuration must have a type or source.');
+                throw new Error('Script configuration must have a `type` defined.');
             }
 
             if (typeof ComponentClass !== 'function') {
@@ -34,7 +25,7 @@ export async function loadScripts(scriptConfigs) {
             // Instantiate the component class with its parameters
             return new ComponentClass(params);
         } catch (error) {
-            console.error(`Failed to load or instantiate script component: ${type || 'inline'}`, error);
+            console.error(`Failed to load or instantiate script component: ${type}`, error);
             return null;
         }
     }));
