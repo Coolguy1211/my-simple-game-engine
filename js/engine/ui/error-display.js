@@ -4,6 +4,8 @@
  * @param {string} message - The main content of the error message.
  */
 export function displayError(title, message) {
+    const previouslyFocusedElement = document.activeElement;
+
     // Create the overlay element
     const overlay = document.createElement('div');
     overlay.style.position = 'fixed';
@@ -29,6 +31,21 @@ export function displayError(title, message) {
     messageBox.style.maxWidth = '500px';
     messageBox.style.textAlign = 'center';
     messageBox.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+    messageBox.style.position = 'relative';
+
+    // Create the close button
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '×';
+    closeButton.setAttribute('aria-label', 'Close dialog');
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '10px';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.fontWeight = 'bold';
+    closeButton.style.color = '#333';
+    closeButton.style.backgroundColor = 'transparent';
+    closeButton.style.border = 'none';
+    closeButton.style.cursor = 'pointer';
 
     // Create the title element
     const titleElement = document.createElement('h2');
@@ -44,10 +61,39 @@ export function displayError(title, message) {
     messageElement.style.lineHeight = '1.5';
 
     // Assemble the elements
+    messageBox.appendChild(closeButton);
     messageBox.appendChild(titleElement);
     messageBox.appendChild(messageElement);
     overlay.appendChild(messageBox);
 
+    // --- Dialog dismissal logic ---
+
+    // Function to close the dialog
+    function closeDialog() {
+        backgroundContent.forEach(el => el.removeAttribute('aria-hidden'));
+        document.body.removeChild(overlay);
+        document.removeEventListener('keydown', handleKeyDown);
+        previouslyFocusedElement.focus();
+    }
+
+    // Handle Escape key press
+    function handleKeyDown(event) {
+        if (event.key === 'Escape') {
+            closeDialog();
+        }
+    }
+
+    // Add event listeners
+    closeButton.addEventListener('click', closeDialog);
+    document.addEventListener('keydown', handleKeyDown);
+
+    // --- Focus management ---
+    const backgroundContent = Array.from(document.body.children).filter(el => el !== overlay);
+    backgroundContent.forEach(el => el.setAttribute('aria-hidden', 'true'));
+
     // Add to the body
     document.body.appendChild(overlay);
+
+    // Set focus on the close button
+    closeButton.focus();
 }
