@@ -21,6 +21,15 @@ export function displayError(title, message) {
     overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-labelledby', 'error-title');
 
+    // --- Accessibility: Manage focus and background content ---
+    const previouslyFocusedElement = document.activeElement;
+    const bodyChildren = Array.from(document.body.children);
+    bodyChildren.forEach(child => {
+        if (child !== overlay) {
+            child.setAttribute('aria-hidden', 'true');
+        }
+    });
+
     // Create the message box
     const messageBox = document.createElement('div');
     messageBox.style.backgroundColor = '#fff';
@@ -43,11 +52,51 @@ export function displayError(title, message) {
     messageElement.style.color = '#333';
     messageElement.style.lineHeight = '1.5';
 
+    // Create the close button
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '×';
+    closeButton.setAttribute('aria-label', 'Close dialog');
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '15px';
+    closeButton.style.background = 'transparent';
+    closeButton.style.border = 'none';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.color = '#888';
+    closeButton.style.padding = '0';
+
+    const closeModal = () => {
+        // --- Accessibility: Restore focus and background content ---
+        bodyChildren.forEach(child => {
+            if (child !== overlay) {
+                child.removeAttribute('aria-hidden');
+            }
+        });
+        document.body.removeChild(overlay);
+        document.removeEventListener('keydown', handleKeyDown);
+        previouslyFocusedElement?.focus();
+    };
+
+    const handleKeyDown = (event) => {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    };
+
+    closeButton.addEventListener('click', closeModal);
+    document.addEventListener('keydown', handleKeyDown);
+
     // Assemble the elements
+    messageBox.style.position = 'relative';
+    messageBox.appendChild(closeButton);
     messageBox.appendChild(titleElement);
     messageBox.appendChild(messageElement);
     overlay.appendChild(messageBox);
 
     // Add to the body
     document.body.appendChild(overlay);
+
+    // --- Accessibility: Set initial focus ---
+    closeButton.focus();
 }
