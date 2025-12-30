@@ -43,11 +43,59 @@ export function displayError(title, message) {
     messageElement.style.color = '#333';
     messageElement.style.lineHeight = '1.5';
 
+    // Create the close button
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '×';
+    closeButton.setAttribute('aria-label', 'Close error dialog');
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '15px';
+    closeButton.style.background = 'transparent';
+    closeButton.style.border = 'none';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.lineHeight = '1';
+
     // Assemble the elements
     messageBox.appendChild(titleElement);
     messageBox.appendChild(messageElement);
+    messageBox.appendChild(closeButton);
     overlay.appendChild(messageBox);
+
+    // --- Accessibility enhancements ---
+    const mainContent = document.getElementById('main-content');
+    const previouslyFocusedElement = document.activeElement;
+
+    if (mainContent) {
+        mainContent.setAttribute('aria-hidden', 'true');
+    }
+
+    // --- Close functionality ---
+    const closeDialog = () => {
+        if (mainContent) {
+            mainContent.removeAttribute('aria-hidden');
+        }
+        document.body.removeChild(overlay);
+        window.removeEventListener('keydown', handleKeyDown);
+
+        // Restore focus to the previously focused element
+        if (previouslyFocusedElement) {
+            previouslyFocusedElement.focus();
+        }
+    };
+
+    const handleKeyDown = (event) => {
+        if (event.key === 'Escape') {
+            closeDialog();
+        }
+    };
+
+    closeButton.addEventListener('click', closeDialog);
+    window.addEventListener('keydown', handleKeyDown);
 
     // Add to the body
     document.body.appendChild(overlay);
+
+    // Set focus to the close button
+    closeButton.focus();
 }
