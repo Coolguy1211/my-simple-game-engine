@@ -61,8 +61,14 @@ export function createGameLoop(renderer, canvas) {
             // Update the debug manager to sync visualizations
             DebugManager.update();
 
-            // Clean up destroyed objects
-            activeScene.gameObjects = activeScene.gameObjects.filter(go => !go.isDestroyed);
+            // Clean up destroyed objects.
+            // A reverse loop is used for safe in-place removal without index shifting issues.
+            // This is a performance optimization to avoid allocating a new array every frame.
+            for (let i = activeScene.gameObjects.length - 1; i >= 0; i--) {
+                if (activeScene.gameObjects[i].isDestroyed) {
+                    activeScene.gameObjects.splice(i, 1);
+                }
+            }
         }
 
         // Update the input manager at the end of every frame, regardless of pause state.
