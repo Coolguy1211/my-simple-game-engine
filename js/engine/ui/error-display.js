@@ -1,9 +1,16 @@
 /**
- * Displays an error message overlay on the screen.
+ * Displays an accessible error message overlay on the screen.
+ * The dialog can be dismissed by clicking the close button or pressing the Escape key.
  * @param {string} title - The title of the error message.
  * @param {string} message - The main content of the error message.
  */
 export function displayError(title, message) {
+    const previouslyFocusedElement = document.activeElement;
+    const canvas = document.getElementById('c');
+    if (canvas) {
+        canvas.setAttribute('aria-hidden', 'true');
+    }
+
     // Create the overlay element
     const overlay = document.createElement('div');
     overlay.style.position = 'fixed';
@@ -27,8 +34,23 @@ export function displayError(title, message) {
     messageBox.style.padding = '20px 40px';
     messageBox.style.borderRadius = '8px';
     messageBox.style.maxWidth = '500px';
+    messageBox.style.position = 'relative'; // For positioning the close button
     messageBox.style.textAlign = 'center';
     messageBox.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+
+    // Create the close button
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '×'; // A simple 'X' for the close icon
+    closeButton.setAttribute('aria-label', 'Close');
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '10px';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.lineHeight = '1';
+    closeButton.style.border = 'none';
+    closeButton.style.background = 'transparent';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.padding = '5px';
 
     // Create the title element
     const titleElement = document.createElement('h2');
@@ -44,10 +66,34 @@ export function displayError(title, message) {
     messageElement.style.lineHeight = '1.5';
 
     // Assemble the elements
+    messageBox.appendChild(closeButton);
     messageBox.appendChild(titleElement);
     messageBox.appendChild(messageElement);
     overlay.appendChild(messageBox);
 
     // Add to the body
     document.body.appendChild(overlay);
+
+    // Focus management and cleanup
+    closeButton.focus();
+
+    function closeModal() {
+        document.body.removeChild(overlay);
+        if (canvas) {
+            canvas.setAttribute('aria-hidden', 'false');
+        }
+        previouslyFocusedElement?.focus();
+        // Clean up event listeners
+        closeButton.removeEventListener('click', closeModal);
+        document.removeEventListener('keydown', handleKeyDown);
+    }
+
+    function handleKeyDown(event) {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    }
+
+    closeButton.addEventListener('click', closeModal);
+    document.addEventListener('keydown', handleKeyDown);
 }
