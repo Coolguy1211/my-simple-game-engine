@@ -43,11 +43,54 @@ export function displayError(title, message) {
     messageElement.style.color = '#333';
     messageElement.style.lineHeight = '1.5';
 
+    // Store the previously focused element
+    const previousActiveElement = document.activeElement;
+
+    // Create a close button
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '×';
+    closeButton.setAttribute('aria-label', 'Close dialog');
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '10px';
+    closeButton.style.background = 'transparent';
+    closeButton.style.border = 'none';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.cursor = 'pointer';
+
+    // Function to close the overlay
+    function closeOverlay() {
+        if (document.body.contains(overlay)) {
+            document.body.removeChild(overlay);
+        }
+        document.removeEventListener('keydown', handleKeyDown);
+        // Return focus to the element that had it before the modal was opened
+        if (previousActiveElement) {
+            previousActiveElement.focus();
+        }
+    }
+
+    // Event listener for the close button
+    closeButton.addEventListener('click', closeOverlay);
+
+    // Event listener for the Escape key
+    function handleKeyDown(event) {
+        if (event.key === 'Escape') {
+            closeOverlay();
+        }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+
     // Assemble the elements
+    messageBox.appendChild(closeButton);
     messageBox.appendChild(titleElement);
     messageBox.appendChild(messageElement);
     overlay.appendChild(messageBox);
 
     // Add to the body
     document.body.appendChild(overlay);
+
+    // Set focus to the close button
+    closeButton.focus();
 }
