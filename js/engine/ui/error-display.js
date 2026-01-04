@@ -21,6 +21,15 @@ export function displayError(title, message) {
     overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-labelledby', 'error-title');
 
+    // Store the previously focused element to restore focus when the modal is closed
+    const previouslyFocusedElement = document.activeElement;
+
+    // Selectively hide background content from screen readers to avoid side effects.
+    const elementsToHide = Array.from(document.body.children).filter(
+        (child) => child.getAttribute('aria-hidden') !== 'true'
+    );
+    elementsToHide.forEach((child) => child.setAttribute('aria-hidden', 'true'));
+
     // Create the message box
     const messageBox = document.createElement('div');
     messageBox.style.backgroundColor = '#fff';
@@ -43,11 +52,55 @@ export function displayError(title, message) {
     messageElement.style.color = '#333';
     messageElement.style.lineHeight = '1.5';
 
+    // Create the close button
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '×'; // A simple 'x' for the close icon
+    closeButton.setAttribute('aria-label', 'Close dialog');
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '15px';
+    closeButton.style.background = 'none';
+    closeButton.style.border = 'none';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.color = '#333';
+
+    // Function to handle keydown events for accessibility (e.g., Escape key)
+    const handleKeyDown = (event) => {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    };
+
+    // Function to close the modal
+    function closeModal() {
+        if (document.body.contains(overlay)) {
+            document.body.removeChild(overlay);
+        }
+        document.removeEventListener('keydown', handleKeyDown);
+        // Restore focus to the element that had it before the modal was opened
+        if (previouslyFocusedElement) {
+            previouslyFocusedElement.focus();
+        }
+        // Restore visibility only to the elements that were explicitly hidden.
+        elementsToHide.forEach((child) => child.removeAttribute('aria-hidden'));
+    }
+
+    closeButton.addEventListener('click', closeModal);
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Make the message box position relative to contain the close button
+    messageBox.style.position = 'relative';
+
     // Assemble the elements
     messageBox.appendChild(titleElement);
     messageBox.appendChild(messageElement);
+    messageBox.appendChild(closeButton);
     overlay.appendChild(messageBox);
 
     // Add to the body
     document.body.appendChild(overlay);
+
+    // Focus the close button for accessibility
+    closeButton.focus();
 }
