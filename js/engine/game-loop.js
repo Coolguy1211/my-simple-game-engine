@@ -61,8 +61,17 @@ export function createGameLoop(renderer, canvas) {
             // Update the debug manager to sync visualizations
             DebugManager.update();
 
-            // Clean up destroyed objects
-            activeScene.gameObjects = activeScene.gameObjects.filter(go => !go.isDestroyed);
+            // ⚡ Bolt: Optimized destroyed object cleanup.
+            // The previous implementation used Array.prototype.filter(), which creates a new array on every frame,
+            // leading to unnecessary memory allocation and garbage collection pressure.
+            // This optimized version iterates backwards and uses splice() to remove items in-place.
+            // This is significantly more performant as it avoids creating new arrays and reduces GC pauses.
+            // Looping backwards is crucial as it prevents index shifting issues when an element is removed.
+            for (let i = activeScene.gameObjects.length - 1; i >= 0; i--) {
+                if (activeScene.gameObjects[i].isDestroyed) {
+                    activeScene.gameObjects.splice(i, 1);
+                }
+            }
         }
 
         // Update the input manager at the end of every frame, regardless of pause state.
