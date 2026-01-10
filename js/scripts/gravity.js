@@ -28,12 +28,17 @@ export default class Gravity {
         // This is a temporary, simple collision detection that will be replaced
         // by a proper physics engine and the onCollisionEnter method.
         const floor = scene.getObjectByName('floor');
-        if (floor) {
-            const floorY = floor.position.y + floor.geometry.parameters.height / 2;
-            const objectHeight = this.gameObject.transform.geometry.parameters.height;
+        if (floor && floor.children.length > 0 && floor.children[0].geometry) {
+            const floorMesh = floor.children[0];
+            const floorY = floor.position.y + floorMesh.geometry.parameters.height / 2;
 
-            if (this.gameObject.transform.position.y - objectHeight / 2 < floorY) {
-                this.gameObject.transform.position.y = floorY + objectHeight / 2;
+            // Use a bounding box for more robust height calculation, especially for models
+            const objectBoundingBox = new THREE.Box3().setFromObject(this.gameObject.transform);
+            const objectLowestPoint = objectBoundingBox.min.y;
+
+            if (objectLowestPoint < floorY) {
+                // Adjust position so the object's lowest point is on the floor
+                this.gameObject.transform.position.y += (floorY - objectLowestPoint);
                 this.velocity.y = 0;
                 this.isGrounded = true;
             } else {
