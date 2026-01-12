@@ -6,34 +6,43 @@ export default class Gravity {
     constructor() {
         this.velocity = new THREE.Vector3(0, 0, 0);
         this.isGrounded = false;
+
+        // Cached values for performance
+        this.floorY = null;
+        this.objectHalfHeight = 0;
     }
 
     onStart(scene) {
-        // This is where we could cache references to other objects if needed,
-        // for example, the floor object.
+        // Cache geometry and position data on start to avoid expensive lookups
+        // and calculations in the update loop, which is a major performance win.
+        const floor = scene.getObjectByName('floor');
+        if (floor) {
+            const floorBox = new THREE.Box3().setFromObject(floor);
+            this.floorY = floorBox.max.y;
+        }
+
+        // Use a bounding box to robustly get the player's height,
+        // as glTF models may not have a direct geometry property.
+        const objectBox = new THREE.Box3().setFromObject(this.gameObject.transform);
+        const objectSize = new THREE.Vector3();
+        objectBox.getSize(objectSize);
+        this.objectHalfHeight = objectSize.y / 2;
     }
 
-    update(deltaTime, scene) {
+    update(deltaTime) {
         // Apply gravity if the object is not on the ground.
         if (!this.isGrounded) {
             this.velocity.y += GRAVITY_CONSTANT * deltaTime;
         }
 
         // Apply velocity to the game object's transform.
-        this.gameObject.transform.position.x += this.velocity.x * deltaTime;
-        this.gameObject.transform.position.y += this.velocity.y * deltaTime;
-        this.gameObject.transform.position.z += this.velocity.z * deltaTime;
+        // Perf: Use addScaledVector for a single, efficient operation.
+        this.gameObject.transform.position.addScaledVector(this.velocity, deltaTime);
 
-
-        // This is a temporary, simple collision detection that will be replaced
-        // by a proper physics engine and the onCollisionEnter method.
-        const floor = scene.getObjectByName('floor');
-        if (floor) {
-            const floorY = floor.position.y + floor.geometry.parameters.height / 2;
-            const objectHeight = this.gameObject.transform.geometry.parameters.height;
-
-            if (this.gameObject.transform.position.y - objectHeight / 2 < floorY) {
-                this.gameObject.transform.position.y = floorY + objectHeight / 2;
+        // Perform collision detection using cached values for maximum performance.
+        if (this.floorY !== null) {
+            if (this.gameObject.transform.position.y - this.objectHalfHeight < this.floorY) {
+                this.gameObject.transform.position.y = this.floorY + this.objectHalfHeight;
                 this.velocity.y = 0;
                 this.isGrounded = true;
             } else {
