@@ -78,21 +78,46 @@ async function loadCamera(scene, cameraConfig) {
 
 async function loadGameObject(scene, objConfig) {
     const gameObject = new GameObject(objConfig.name);
-    if (objConfig.position) gameObject.transform.position.set(objConfig.position.x, objConfig.position.y, objConfig.position.z);
+    if (objConfig.position) {
+        gameObject.transform.position.set(objConfig.position.x, objConfig.position.y, objConfig.position.z);
+    }
+
+    // ⚡ Bolt: Load model/material and scripts in parallel to speed up object initialization.
+    const promises = [];
+
     if (objConfig.model) {
-        const gltf = await gltfLoader.loadAsync(objConfig.model);
-        gameObject.transform = gltf.scene;
-        gameObject.transform.name = gameObject.name;
-        if (objConfig.position) gameObject.transform.position.set(objConfig.position.x, objConfig.position.y, objConfig.position.z);
+        const modelPromise = gltfLoader.loadAsync(objConfig.model).then(gltf => {
+            gameObject.transform = gltf.scene;
+            gameObject.transform.name = gameObject.name;
+            // Re-apply position after model is loaded, as it might be reset.
+            if (objConfig.position) {
+                gameObject.transform.position.set(objConfig.position.x, objConfig.position.y, objConfig.position.z);
+            }
+        });
+        promises.push(modelPromise);
     } else if (objConfig.geometry) {
-        const geometry = new THREE[objConfig.geometry.type](objConfig.geometry.width || 1, objConfig.geometry.height || 1, objConfig.geometry.depth || 1);
-        const material = await createMaterial(objConfig.material);
-        gameObject.addComponent(new MeshRenderer(new THREE.Mesh(geometry, material)));
+        const materialPromise = createMaterial(objConfig.material).then(material => {
+            const geometry = new THREE[objConfig.geometry.type](
+                objConfig.geometry.width || 1,
+                objConfig.geometry.height || 1,
+                objConfig.geometry.depth || 1
+            );
+            gameObject.addComponent(new MeshRenderer(new THREE.Mesh(geometry, material)));
+        });
+        promises.push(materialPromise);
     }
+
     if (objConfig.scripts) {
-        const components = await loadScripts(objConfig.scripts);
-        for (const component of components) gameObject.addComponent(component);
+        const scriptsPromise = loadScripts(objConfig.scripts).then(components => {
+            for (const component of components) {
+                gameObject.addComponent(component);
+            }
+        });
+        promises.push(scriptsPromise);
     }
+
+    await Promise.all(promises);
+
     scene.add(gameObject.transform);
     return gameObject;
 }
