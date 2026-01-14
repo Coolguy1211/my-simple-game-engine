@@ -29,6 +29,7 @@ export function displayError(title, message) {
     messageBox.style.maxWidth = '500px';
     messageBox.style.textAlign = 'center';
     messageBox.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+    messageBox.style.position = 'relative';
 
     // Create the title element
     const titleElement = document.createElement('h2');
@@ -43,11 +44,77 @@ export function displayError(title, message) {
     messageElement.style.color = '#333';
     messageElement.style.lineHeight = '1.5';
 
+    // Create the close button
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '×';
+    closeButton.setAttribute('aria-label', 'Close dialog');
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '10px';
+    closeButton.style.background = 'transparent';
+    closeButton.style.border = 'none';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.cursor = 'pointer';
+
     // Assemble the elements
     messageBox.appendChild(titleElement);
     messageBox.appendChild(messageElement);
+    messageBox.appendChild(closeButton);
     overlay.appendChild(messageBox);
 
     // Add to the body
     document.body.appendChild(overlay);
+
+    // --- Accessibility & UX Enhancements ---
+
+    const previouslyFocusedElement = document.activeElement;
+    const focusableElements = messageBox.querySelectorAll('button');
+    const firstFocusableElement = focusableElements[0];
+    const lastFocusableElement = focusableElements[focusableElements.length - 1];
+
+    // Hide background content from screen readers
+    const siblings = Array.from(document.body.children).filter(child => child !== overlay);
+    siblings.forEach(sibling => {
+        if (sibling.hasAttribute('aria-hidden')) return;
+        sibling.setAttribute('aria-hidden', 'true');
+        sibling.dataset.wasHiddenByModal = 'true';
+    });
+
+    function closeModal() {
+        document.body.removeChild(overlay);
+        // Restore screen reader visibility
+        siblings.forEach(sibling => {
+            if (sibling.dataset.wasHiddenByModal === 'true') {
+                sibling.removeAttribute('aria-hidden');
+                sibling.removeAttribute('data-was-hidden-by-modal');
+            }
+        });
+        previouslyFocusedElement?.focus();
+    }
+
+    function trapFocus(e) {
+        if (e.key !== 'Tab') return;
+
+        if (e.shiftKey) { // Shift + Tab
+            if (document.activeElement === firstFocusableElement) {
+                lastFocusableElement.focus();
+                e.preventDefault();
+            }
+        } else { // Tab
+            if (document.activeElement === lastFocusableElement) {
+                firstFocusableElement.focus();
+                e.preventDefault();
+            }
+        }
+    }
+
+    // Event listeners
+    closeButton.addEventListener('click', closeModal);
+    overlay.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+    });
+    overlay.addEventListener('keydown', trapFocus);
+
+    // Set initial focus
+    closeButton.focus();
 }
