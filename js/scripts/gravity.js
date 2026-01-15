@@ -6,11 +6,14 @@ export default class Gravity {
     constructor() {
         this.velocity = new THREE.Vector3(0, 0, 0);
         this.isGrounded = false;
+        this.objectHeight = 0;
     }
 
     onStart(scene) {
-        // This is where we could cache references to other objects if needed,
-        // for example, the floor object.
+        // Cache the object's height for performance. Using a bounding box is safer
+        // than assuming a geometry property, which may not exist on all objects.
+        const boundingBox = new THREE.Box3().setFromObject(this.gameObject.transform);
+        this.objectHeight = boundingBox.max.y - boundingBox.min.y;
     }
 
     update(deltaTime, scene) {
@@ -30,10 +33,9 @@ export default class Gravity {
         const floor = scene.getObjectByName('floor');
         if (floor) {
             const floorY = floor.position.y + floor.geometry.parameters.height / 2;
-            const objectHeight = this.gameObject.transform.geometry.parameters.height;
 
-            if (this.gameObject.transform.position.y - objectHeight / 2 < floorY) {
-                this.gameObject.transform.position.y = floorY + objectHeight / 2;
+            if (this.gameObject.transform.position.y - this.objectHeight / 2 < floorY) {
+                this.gameObject.transform.position.y = floorY + this.objectHeight / 2;
                 this.velocity.y = 0;
                 this.isGrounded = true;
             } else {
