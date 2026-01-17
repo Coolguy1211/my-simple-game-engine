@@ -29,6 +29,7 @@ export function displayError(title, message) {
     messageBox.style.maxWidth = '500px';
     messageBox.style.textAlign = 'center';
     messageBox.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+    messageBox.style.position = 'relative'; // For positioning the close button
 
     // Create the title element
     const titleElement = document.createElement('h2');
@@ -43,11 +44,40 @@ export function displayError(title, message) {
     messageElement.style.color = '#333';
     messageElement.style.lineHeight = '1.5';
 
+    // Create the close button
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '×'; // A simple 'x' for the close icon
+    closeButton.setAttribute('aria-label', 'Close dialog');
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '10px';
+    closeButton.style.background = 'none';
+    closeButton.style.border = 'none';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.lineHeight = '1';
+
     // Assemble the elements
+    messageBox.appendChild(closeButton);
     messageBox.appendChild(titleElement);
     messageBox.appendChild(messageElement);
     overlay.appendChild(messageBox);
 
     // Add to the body
     document.body.appendChild(overlay);
+
+    // --- Close functionality ---
+    const closeModal = () => {
+        document.body.removeChild(overlay);
+        document.removeEventListener('keydown', handleEsc);
+    };
+
+    const handleEsc = (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    };
+
+    closeButton.addEventListener('click', closeModal);
+    document.addEventListener('keydown', handleEsc);
 }
