@@ -104,22 +104,32 @@ async function loadGameObjects(scene, objectsConfig) {
 export async function loadSceneFromConfig(gameConfig) {
     const scene = new THREE.Scene();
 
-    // Load skybox or set background color
-    if (gameConfig.scene.skybox) {
-        try {
-            const texture = await cubeTextureLoader.loadAsync(gameConfig.scene.skybox);
-            scene.background = texture;
-        } catch (error) {
+    // ⚡ Bolt: Load skybox, camera, and objects in parallel for faster scene setup.
+    // This avoids a sequential loading waterfall and reduces total load time.
+    const skyboxPromise = gameConfig.scene.skybox
+        ? cubeTextureLoader.loadAsync(gameConfig.scene.skybox).catch(error => {
             console.error("Failed to load skybox, falling back to color.", error);
-            scene.background = new THREE.Color(parseInt(gameConfig.scene.background || "0x101010"));
-        }
+            return null; // Return null on error to not break Promise.all
+        })
+        : Promise.resolve(null);
+
+    const cameraPromise = loadCamera(scene, gameConfig.camera);
+    const gameObjectsPromise = loadGameObjects(scene, gameConfig.objects || []);
+
+    const [skyboxTexture, cameraGO, gameObjects] = await Promise.all([
+        skyboxPromise,
+        cameraPromise,
+        gameObjectsPromise,
+    ]);
+
+    if (skyboxTexture) {
+        scene.background = skyboxTexture;
     } else {
         scene.background = new THREE.Color(parseInt(gameConfig.scene.background || "0x101010"));
     }
 
     loadLights(scene, gameConfig.lights);
-    const cameraGO = await loadCamera(scene, gameConfig.camera);
-    const gameObjects = await loadGameObjects(scene, gameConfig.objects || []);
+
     const allGameObjects = [cameraGO, ...gameObjects];
     for (const go of allGameObjects) {
         go.onStart(scene);
