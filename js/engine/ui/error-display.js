@@ -43,7 +43,37 @@ export function displayError(title, message) {
     messageElement.style.color = '#333';
     messageElement.style.lineHeight = '1.5';
 
+    // --- Close Button ---
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '×'; // A simple "X"
+    closeButton.setAttribute('aria-label', 'Close dialog');
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '15px';
+    closeButton.style.background = 'transparent';
+    closeButton.style.border = 'none';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.color = '#888';
+
+    // --- Close Functionality ---
+    const closeDialog = () => {
+        document.body.removeChild(overlay);
+        // Clean up the keydown listener
+        window.removeEventListener('keydown', handleKeyDown);
+    };
+
+    const handleKeyDown = (event) => {
+        if (event.key === 'Escape') {
+            closeDialog();
+        }
+    };
+
+    closeButton.addEventListener('click', closeDialog);
+    window.addEventListener('keydown', handleKeyDown);
+
     // Assemble the elements
+    messageBox.appendChild(closeButton);
     messageBox.appendChild(titleElement);
     messageBox.appendChild(messageElement);
     overlay.appendChild(messageBox);
