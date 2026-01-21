@@ -61,8 +61,28 @@ export function createGameLoop(renderer, canvas) {
             // Update the debug manager to sync visualizations
             DebugManager.update();
 
-            // Clean up destroyed objects
-            activeScene.gameObjects = activeScene.gameObjects.filter(go => !go.isDestroyed);
+            // Clean up destroyed objects.
+            // This uses a more efficient in-place removal algorithm to avoid creating a new array every frame.
+            //
+            // Why this is faster:
+            // 1. No Allocation: It doesn't allocate a new array, which prevents the garbage collector
+            //    from having to clean up the old one later. This reduces GC pauses and stutters.
+            // 2. Single Pass: It iterates through the list once, moving elements instead of creating a new list.
+            //
+            // How it works:
+            // - It maintains a "write" index (`j`) for the next position to fill with a non-destroyed object.
+            // - It iterates with a "read" index (`i`). If `gameObjects[i]` is NOT destroyed, it's moved to `gameObjects[j]`.
+            // - `j` is only incremented when a "good" object is found.
+            // - After the loop, the array is truncated to the new size `j`.
+            let j = 0;
+            for (let i = 0; i < activeScene.gameObjects.length; i++) {
+                const go = activeScene.gameObjects[i];
+                if (!go.isDestroyed) {
+                    activeScene.gameObjects[j] = go;
+                    j++;
+                }
+            }
+            activeScene.gameObjects.length = j;
         }
 
         // Update the input manager at the end of every frame, regardless of pause state.
