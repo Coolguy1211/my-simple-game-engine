@@ -61,8 +61,15 @@ export function createGameLoop(renderer, canvas) {
             // Update the debug manager to sync visualizations
             DebugManager.update();
 
-            // Clean up destroyed objects
-            activeScene.gameObjects = activeScene.gameObjects.filter(go => !go.isDestroyed);
+            // Clean up destroyed objects.
+            // By iterating backwards and using splice, we can remove items in-place
+            // without creating a new array every frame. This is much more efficient
+            // and avoids triggering the garbage collector unnecessarily.
+            for (let i = gameObjects.length - 1; i >= 0; i--) {
+                if (gameObjects[i].isDestroyed) {
+                    gameObjects.splice(i, 1);
+                }
+            }
         }
 
         // Update the input manager at the end of every frame, regardless of pause state.
