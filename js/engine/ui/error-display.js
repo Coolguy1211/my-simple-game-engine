@@ -43,9 +43,28 @@ export function displayError(title, message) {
     messageElement.style.color = '#333';
     messageElement.style.lineHeight = '1.5';
 
+    // Create a dismiss button
+    const dismissButton = document.createElement('button');
+    dismissButton.textContent = 'Dismiss';
+    dismissButton.style.marginTop = '20px';
+    dismissButton.style.padding = '10px 20px';
+    dismissButton.style.border = 'none';
+    dismissButton.style.borderRadius = '5px';
+    dismissButton.style.backgroundColor = '#d9534f';
+    dismissButton.style.color = 'white';
+    dismissButton.style.cursor = 'pointer';
+    dismissButton.style.fontSize = '16px';
+    dismissButton.setAttribute('aria-label', 'Dismiss error message');
+
+    // Add event listener to remove the overlay on click
+    dismissButton.addEventListener('click', () => {
+        document.body.removeChild(overlay);
+    });
+
     // Assemble the elements
     messageBox.appendChild(titleElement);
     messageBox.appendChild(messageElement);
+    messageBox.appendChild(dismissButton);
     overlay.appendChild(messageBox);
 
     // Add to the body
