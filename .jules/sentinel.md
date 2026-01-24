@@ -1,0 +1,4 @@
+## 2024-07-16 - Critical RCE via Inline Scripts in Scene Files
+**Vulnerability:** The engine's `script-manager.js` component used `new Function()` to execute JavaScript code directly from a `source` property in scene JSON files.
+**Learning:** This architectural pattern, while offering flexibility, created a critical Remote Code Execution (RCE) vulnerability. If a malicious actor could control the content of a scene file, they could execute arbitrary code in the context of the application. The `README.md` even acknowledged the risk, indicating it was a known design flaw.
+**Prevention:** Removed the inline script execution feature entirely. All scripts must now be loaded from external files in the `js/scripts/` directory. This ensures that only trusted, validated code is executed by the engine. Future development should avoid any feature that executes data as code.
