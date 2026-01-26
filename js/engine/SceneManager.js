@@ -1,6 +1,6 @@
 import { Scene } from './Scene.js';
 import { loadSceneFromConfig } from './scene-loader.js';
-
+import { showLoadingIndicator, hideLoadingIndicator } from './ui/loading-indicator.js';
 class SceneManager {
     constructor() {
         if (SceneManager.instance) {
@@ -35,7 +35,7 @@ class SceneManager {
             return;
         }
         this.isLoading = true;
-
+        showLoadingIndicator();
         console.log(`Loading scene: ${name}`);
 
         // Unload the current scene if there is one
@@ -72,6 +72,7 @@ class SceneManager {
             throw error;
         } finally {
             this.isLoading = false;
+            hideLoadingIndicator();
         }
     }
 
