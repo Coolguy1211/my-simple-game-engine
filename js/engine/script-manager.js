@@ -8,23 +8,22 @@ export async function loadScripts(scriptConfigs) {
         const { type, source, ...params } = config;
 
         try {
+            // CRITICAL: Prevent RCE by explicitly disallowing inline scripts.
+            if (source) {
+                throw new Error(
+                    'SECURITY ERROR: Inline scripts (using "source") are disabled due to a critical Remote Code Execution (RCE) vulnerability. ' +
+                    'Please move the script to an external file in the "js/scripts/" directory and reference it using the "type" property.'
+                );
+            }
+
             let ComponentClass;
 
-            if (source) {
-                // WARNING: Executes code from JSON. Only use with trusted scene data.
-                console.warn(
-                    'SECURITY WARNING: An inline script is being executed. ' +
-                    'This is a potential security risk if the scene file is from an untrusted source. ' +
-                    'Avoid using inline scripts in production environments.'
-                );
-                // If a 'source' property exists, create the class from the string
-                ComponentClass = new Function(`return (${source})`)();
-            } else if (type) {
-                // Otherwise, load from an external file
+            if (type) {
+                // Load from an external file
                 const module = await import(`../scripts/${type}.js`);
                 ComponentClass = module.default;
             } else {
-                throw new Error('Script configuration must have a type or source.');
+                throw new Error('Script configuration must have a "type" property.');
             }
 
             if (typeof ComponentClass !== 'function') {
