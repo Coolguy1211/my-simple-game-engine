@@ -1,0 +1,3 @@
+## 2024-07-22 - Game Loop Array Allocation
+**Learning:** The game loop was creating a new `gameObjects` array every frame using `filter()`, causing unnecessary memory allocation and garbage collection. This is a classic performance anti-pattern in game development.
+**Action:** Replace `filter()` with an in-place removal algorithm (e.g., a reverse loop with `splice` or a two-pointer swap) to avoid GC churn.
