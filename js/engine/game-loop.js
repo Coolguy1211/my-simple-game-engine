@@ -61,8 +61,21 @@ export function createGameLoop(renderer, canvas) {
             // Update the debug manager to sync visualizations
             DebugManager.update();
 
-            // Clean up destroyed objects
-            activeScene.gameObjects = activeScene.gameObjects.filter(go => !go.isDestroyed);
+            // --- Performance Optimization ---
+            // To avoid allocating a new array every frame, we use a manual in-place removal algorithm.
+            // This is significantly more memory-efficient than `filter()`, which can cause garbage collection stalls.
+            let writeIndex = 0;
+            for (let readIndex = 0; readIndex < activeScene.gameObjects.length; readIndex++) {
+                const gameObject = activeScene.gameObjects[readIndex];
+                if (!gameObject.isDestroyed) {
+                    if (writeIndex !== readIndex) {
+                        activeScene.gameObjects[writeIndex] = gameObject;
+                    }
+                    writeIndex++;
+                }
+            }
+            // Remove the destroyed objects from the end of the array
+            activeScene.gameObjects.length = writeIndex;
         }
 
         // Update the input manager at the end of every frame, regardless of pause state.
