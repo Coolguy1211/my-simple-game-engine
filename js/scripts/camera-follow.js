@@ -9,6 +9,8 @@ export default class CameraFollow {
         // Private properties
         this.targetTransform = null;
         this.offset = new THREE.Vector3();
+        // Optimization: Cache Vector3 to avoid per-frame allocations
+        this._desiredPosition = new THREE.Vector3();
     }
 
     onStart(scene) {
@@ -36,8 +38,8 @@ export default class CameraFollow {
         }
 
         // Smoothly move the camera towards the target's position plus the offset.
-        const desiredPosition = this.targetTransform.position.clone().add(this.offset);
-        this.gameObject.transform.position.lerp(desiredPosition, this.smoothSpeed);
+        this._desiredPosition.copy(this.targetTransform.position).add(this.offset);
+        this.gameObject.transform.position.lerp(this._desiredPosition, this.smoothSpeed);
 
         // Always look at the target's position.
         this.gameObject.transform.lookAt(this.targetTransform.position);
