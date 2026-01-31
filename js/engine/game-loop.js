@@ -48,21 +48,39 @@ export function createGameLoop(renderer, canvas) {
         // --- Main Update Logic ---
         // Only run the game simulation if the state is PLAYING.
         if (TimeManager.isPlaying()) {
-            const { gameObjects, threeScene } = activeScene;
+            const gameObjects = activeScene.gameObjects;
+            const { threeScene } = activeScene;
             const deltaTime = TimeManager.deltaTime;
 
-            // Update all game objects
-            for (const gameObject of gameObjects) {
+            // Update and clean up game objects in a single pass to avoid per-frame allocations.
+            // We use a write pointer to compact the array in-place, which is much more
+            // efficient than Array.prototype.filter() as it avoids creating a new array every frame.
+            let writeIndex = 0;
+            for (let i = 0; i < gameObjects.length; i++) {
+                const gameObject = gameObjects[i];
                 if (!gameObject.isDestroyed) {
+                    // Update the object
                     gameObject.update(deltaTime, threeScene, inputManager);
+
+                    // Re-check isDestroyed in case it was destroyed during its own update
+                    if (!gameObject.isDestroyed) {
+                        if (writeIndex !== i) {
+                            gameObjects[writeIndex] = gameObject;
+                        }
+                        writeIndex++;
+                    }
                 }
             }
 
-            // Update the debug manager to sync visualizations
-            DebugManager.update();
+            // Trim the array if any objects were removed.
+            // This in-place modification avoids the garbage collection overhead of filter().
+            if (gameObjects.length !== writeIndex) {
+                gameObjects.length = writeIndex;
+            }
 
-            // Clean up destroyed objects
-            activeScene.gameObjects = activeScene.gameObjects.filter(go => !go.isDestroyed);
+            // Update the debug manager to sync visualizations.
+            // Calling this after cleanup ensures debug helpers are synced with the current active objects.
+            DebugManager.update();
         }
 
         // Update the input manager at the end of every frame, regardless of pause state.
