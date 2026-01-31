@@ -1,5 +1,6 @@
 import { Scene } from './Scene.js';
 import { loadSceneFromConfig } from './scene-loader.js';
+import { showLoadingOverlay, hideLoadingOverlay } from './ui/loading-overlay.js';
 
 class SceneManager {
     constructor() {
@@ -35,6 +36,7 @@ class SceneManager {
             return;
         }
         this.isLoading = true;
+        showLoadingOverlay();
 
         console.log(`Loading scene: ${name}`);
 
@@ -72,6 +74,7 @@ class SceneManager {
             throw error;
         } finally {
             this.isLoading = false;
+            hideLoadingOverlay();
         }
     }
 
