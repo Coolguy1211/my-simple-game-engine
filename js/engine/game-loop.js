@@ -51,18 +51,30 @@ export function createGameLoop(renderer, canvas) {
             const { gameObjects, threeScene } = activeScene;
             const deltaTime = TimeManager.deltaTime;
 
-            // Update all game objects
-            for (const gameObject of gameObjects) {
+            // Update all game objects using a standard for loop for better performance.
+            const gameObjectsCount = gameObjects.length;
+            for (let i = 0; i < gameObjectsCount; i++) {
+                const gameObject = gameObjects[i];
                 if (!gameObject.isDestroyed) {
                     gameObject.update(deltaTime, threeScene, inputManager);
                 }
             }
 
-            // Update the debug manager to sync visualizations
-            DebugManager.update();
+            // Clean up destroyed objects using an in-place write-pointer algorithm
+            // to avoid the performance overhead of .filter() and array reallocation every frame.
+            let writeIdx = 0;
+            for (let readIdx = 0; readIdx < gameObjects.length; readIdx++) {
+                const gameObject = gameObjects[readIdx];
+                if (!gameObject.isDestroyed) {
+                    gameObjects[writeIdx] = gameObject;
+                    writeIdx++;
+                }
+            }
+            gameObjects.length = writeIdx;
 
-            // Clean up destroyed objects
-            activeScene.gameObjects = activeScene.gameObjects.filter(go => !go.isDestroyed);
+            // Update the debug manager after cleanup to ensure visualizations are synced
+            // with the final set of active game objects for this frame.
+            DebugManager.update();
         }
 
         // Update the input manager at the end of every frame, regardless of pause state.
