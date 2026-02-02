@@ -96,7 +96,7 @@
       "position": { "x": 2, "y": 0, "z": -2 },
       "scripts": [
         {
-          "source": "class { onStart() { console.log('Inline script started!'); } update(dt) { this.gameObject.transform.rotation.y += dt; } }"
+          "type": "rotator"
         }
       ]
     }
