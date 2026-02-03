@@ -1,0 +1,3 @@
+## 2025-05-15 - [Improving 3D Scene Accessibility and Error Recovery]
+**Learning:** For Three.js applications, the canvas element is the primary point of interaction but is often a "black box" for screen readers and keyboard navigation. Adding `role="img"`, `aria-label`, and `tabindex="0"` (with CSS focus styles) makes the scene discoverable and interactable for all users. Additionally, providing a clear "Reload Page" action in error overlays significantly improves the recovery UX when async asset loading fails.
+**Action:** Always verify that the main rendering canvas has appropriate ARIA attributes and focus management. Ensure all full-screen error states offer at least one actionable recovery step.
