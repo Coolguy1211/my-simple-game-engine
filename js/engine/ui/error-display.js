@@ -43,9 +43,35 @@ export function displayError(title, message) {
     messageElement.style.color = '#333';
     messageElement.style.lineHeight = '1.5';
 
+    // Create the reload button
+    const reloadButton = document.createElement('button');
+    reloadButton.textContent = 'Reload Page';
+    reloadButton.style.marginTop = '20px';
+    reloadButton.style.padding = '10px 20px';
+    reloadButton.style.backgroundColor = '#d9534f';
+    reloadButton.style.color = 'white';
+    reloadButton.style.border = 'none';
+    reloadButton.style.borderRadius = '4px';
+    reloadButton.style.cursor = 'pointer';
+    reloadButton.style.fontSize = '16px';
+    reloadButton.style.fontWeight = 'bold';
+    reloadButton.style.transition = 'background-color 0.2s';
+    reloadButton.setAttribute('aria-label', 'Reload the page to try again');
+
+    reloadButton.onmouseover = () => {
+        reloadButton.style.backgroundColor = '#c9302c';
+    };
+    reloadButton.onmouseout = () => {
+        reloadButton.style.backgroundColor = '#d9534f';
+    };
+    reloadButton.onclick = () => {
+        window.location.reload();
+    };
+
     // Assemble the elements
     messageBox.appendChild(titleElement);
     messageBox.appendChild(messageElement);
+    messageBox.appendChild(reloadButton);
     overlay.appendChild(messageBox);
 
     // Add to the body
