@@ -6,11 +6,19 @@ export default class Gravity {
     constructor() {
         this.velocity = new THREE.Vector3(0, 0, 0);
         this.isGrounded = false;
+        this._floor = null;
+        this._box = new THREE.Box3();
+        this._objectSize = new THREE.Vector3();
     }
 
     onStart(scene) {
-        // This is where we could cache references to other objects if needed,
-        // for example, the floor object.
+        // Cache reference to the floor object to avoid per-frame lookups
+        this._floor = scene.getObjectByName('floor');
+
+        // Pre-calculate object height using Box3 for robustness with glTF models
+        this._box.setFromObject(this.gameObject.transform);
+        this._box.getSize(this._objectSize);
+        this.objectHeight = this._objectSize.y;
     }
 
     update(deltaTime, scene) {
@@ -24,16 +32,14 @@ export default class Gravity {
         this.gameObject.transform.position.y += this.velocity.y * deltaTime;
         this.gameObject.transform.position.z += this.velocity.z * deltaTime;
 
+        // Simple collision detection with cached floor reference
+        if (this._floor) {
+            // Optimization: Assume floor height is static for this simple check
+            // A more robust engine would use a real physics system
+            const floorY = this._floor.position.y + (this._floor.geometry ? this._floor.geometry.parameters.height / 2 : 0);
 
-        // This is a temporary, simple collision detection that will be replaced
-        // by a proper physics engine and the onCollisionEnter method.
-        const floor = scene.getObjectByName('floor');
-        if (floor) {
-            const floorY = floor.position.y + floor.geometry.parameters.height / 2;
-            const objectHeight = this.gameObject.transform.geometry.parameters.height;
-
-            if (this.gameObject.transform.position.y - objectHeight / 2 < floorY) {
-                this.gameObject.transform.position.y = floorY + objectHeight / 2;
+            if (this.gameObject.transform.position.y - this.objectHeight / 2 < floorY) {
+                this.gameObject.transform.position.y = floorY + this.objectHeight / 2;
                 this.velocity.y = 0;
                 this.isGrounded = true;
             } else {

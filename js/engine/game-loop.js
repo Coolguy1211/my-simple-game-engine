@@ -48,21 +48,38 @@ export function createGameLoop(renderer, canvas) {
         // --- Main Update Logic ---
         // Only run the game simulation if the state is PLAYING.
         if (TimeManager.isPlaying()) {
-            const { gameObjects, threeScene } = activeScene;
+            const gameObjects = activeScene.gameObjects;
+            const threeScene = activeScene.threeScene;
             const deltaTime = TimeManager.deltaTime;
 
             // Update all game objects
-            for (const gameObject of gameObjects) {
+            const length = gameObjects.length;
+            for (let i = 0; i < length; i++) {
+                const gameObject = gameObjects[i];
                 if (!gameObject.isDestroyed) {
                     gameObject.update(deltaTime, threeScene, inputManager);
                 }
             }
 
-            // Update the debug manager to sync visualizations
-            DebugManager.update();
+            // Clean up destroyed objects in-place to avoid array allocation.
+            // We use the current length to account for any objects added during the update phase.
+            const lengthBeforeCleanup = gameObjects.length;
+            let writeIdx = 0;
+            for (let i = 0; i < lengthBeforeCleanup; i++) {
+                const gameObject = gameObjects[i];
+                if (!gameObject.isDestroyed) {
+                    if (writeIdx !== i) {
+                        gameObjects[writeIdx] = gameObject;
+                    }
+                    writeIdx++;
+                }
+            }
+            if (writeIdx !== lengthBeforeCleanup) {
+                activeScene.gameObjects.length = writeIdx;
+            }
 
-            // Clean up destroyed objects
-            activeScene.gameObjects = activeScene.gameObjects.filter(go => !go.isDestroyed);
+            // Update the debug manager after cleanup to ensure accurate synchronization
+            DebugManager.update();
         }
 
         // Update the input manager at the end of every frame, regardless of pause state.
