@@ -51,8 +51,10 @@ export function createGameLoop(renderer, canvas) {
             const { gameObjects, threeScene } = activeScene;
             const deltaTime = TimeManager.deltaTime;
 
-            // Update all game objects
-            for (const gameObject of gameObjects) {
+            // Update all game objects using a standard for loop to avoid iterator allocation.
+            const length = gameObjects.length;
+            for (let i = 0; i < length; i++) {
+                const gameObject = gameObjects[i];
                 if (!gameObject.isDestroyed) {
                     gameObject.update(deltaTime, threeScene, inputManager);
                 }
@@ -61,8 +63,28 @@ export function createGameLoop(renderer, canvas) {
             // Update the debug manager to sync visualizations
             DebugManager.update();
 
-            // Clean up destroyed objects
-            activeScene.gameObjects = activeScene.gameObjects.filter(go => !go.isDestroyed);
+            // Clean up destroyed objects in-place to avoid array allocation via filter().
+            // This uses a write-pointer approach to shift non-destroyed objects to the front.
+            let writeIndex = 0;
+            const currentLength = gameObjects.length;
+            for (let i = 0; i < currentLength; i++) {
+                const go = gameObjects[i];
+                if (!go.isDestroyed) {
+                    if (writeIndex !== i) {
+                        gameObjects[writeIndex] = go;
+                    }
+                    writeIndex++;
+                }
+            }
+            // If any objects were added to the list during the update loop (after currentLength was captured),
+            // move them to the new end of the array.
+            for (let i = currentLength; i < gameObjects.length; i++) {
+                gameObjects[writeIndex++] = gameObjects[i];
+            }
+            // Truncate the array to the new length.
+            if (gameObjects.length !== writeIndex) {
+                gameObjects.length = writeIndex;
+            }
         }
 
         // Update the input manager at the end of every frame, regardless of pause state.

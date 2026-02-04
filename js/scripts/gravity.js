@@ -6,14 +6,22 @@ export default class Gravity {
     constructor() {
         this.velocity = new THREE.Vector3(0, 0, 0);
         this.isGrounded = false;
+        this.floor = null;
+        this._box = new THREE.Box3();
+        this._floorBox = new THREE.Box3();
     }
 
     onStart(scene) {
-        // This is where we could cache references to other objects if needed,
-        // for example, the floor object.
+        // Cache the floor object to avoid per-frame scene traversal.
+        this.floor = scene.getObjectByName('floor');
     }
 
     update(deltaTime, scene) {
+        // Lazily refresh floor reference if it was lost or not found on start.
+        if (!this.floor) {
+            this.floor = scene.getObjectByName('floor');
+        }
+
         // Apply gravity if the object is not on the ground.
         if (!this.isGrounded) {
             this.velocity.y += GRAVITY_CONSTANT * deltaTime;
@@ -25,15 +33,17 @@ export default class Gravity {
         this.gameObject.transform.position.z += this.velocity.z * deltaTime;
 
 
-        // This is a temporary, simple collision detection that will be replaced
-        // by a proper physics engine and the onCollisionEnter method.
-        const floor = scene.getObjectByName('floor');
-        if (floor) {
-            const floorY = floor.position.y + floor.geometry.parameters.height / 2;
-            const objectHeight = this.gameObject.transform.geometry.parameters.height;
+        // This is a temporary, simple collision detection.
+        // Optimized to use pre-allocated Box3s and avoid scene traversal.
+        if (this.floor) {
+            this._box.setFromObject(this.gameObject.transform);
+            this._floorBox.setFromObject(this.floor);
 
-            if (this.gameObject.transform.position.y - objectHeight / 2 < floorY) {
-                this.gameObject.transform.position.y = floorY + objectHeight / 2;
+            const floorY = this._floorBox.max.y;
+            const objectMinY = this._box.min.y;
+
+            if (objectMinY < floorY) {
+                this.gameObject.transform.position.y += (floorY - objectMinY);
                 this.velocity.y = 0;
                 this.isGrounded = true;
             } else {
