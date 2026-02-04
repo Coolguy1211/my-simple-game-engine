@@ -6,11 +6,13 @@ export default class Gravity {
     constructor() {
         this.velocity = new THREE.Vector3(0, 0, 0);
         this.isGrounded = false;
+        this.floor = null;
+        this.tempBox = new THREE.Box3();
     }
 
     onStart(scene) {
-        // This is where we could cache references to other objects if needed,
-        // for example, the floor object.
+        // Cache the floor object reference to avoid per-frame lookups
+        this.floor = scene.getObjectByName('floor');
     }
 
     update(deltaTime, scene) {
@@ -27,13 +29,21 @@ export default class Gravity {
 
         // This is a temporary, simple collision detection that will be replaced
         // by a proper physics engine and the onCollisionEnter method.
-        const floor = scene.getObjectByName('floor');
-        if (floor) {
-            const floorY = floor.position.y + floor.geometry.parameters.height / 2;
-            const objectHeight = this.gameObject.transform.geometry.parameters.height;
+        if (!this.floor) {
+            this.floor = scene.getObjectByName('floor');
+        }
 
-            if (this.gameObject.transform.position.y - objectHeight / 2 < floorY) {
-                this.gameObject.transform.position.y = floorY + objectHeight / 2;
+        if (this.floor) {
+            // Using Box3 for more robust height calculation that works with both meshes and glTF models.
+            // Caching the Box3 instance to avoid garbage collection pressure.
+            this.tempBox.setFromObject(this.floor);
+            const floorTop = this.tempBox.max.y;
+
+            this.tempBox.setFromObject(this.gameObject.transform);
+            const objectHeight = this.tempBox.max.y - this.tempBox.min.y;
+
+            if (this.gameObject.transform.position.y - objectHeight / 2 < floorTop) {
+                this.gameObject.transform.position.y = floorTop + objectHeight / 2;
                 this.velocity.y = 0;
                 this.isGrounded = true;
             } else {

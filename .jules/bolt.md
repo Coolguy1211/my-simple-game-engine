@@ -1,0 +1,3 @@
+## 2025-05-15 - Hot-path loop and allocation optimizations
+**Learning:** In a high-frequency loop (60fps), even small allocations like `new Vector3()` or `Array.filter()` can cause significant GC pressure and frame stutters. `for...of` iterators also have a small overhead compared to standard `for` loops. Caching scene object lookups (e.g., `getObjectByName`) is essential as they are typically O(N).
+**Action:** Always prefer standard `for` loops and in-place array manipulations in the main game loop and component update methods. Pre-allocate temporary objects (Vectors, Box3s) in the constructor. Cache object references in `onStart`.
