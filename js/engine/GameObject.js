@@ -19,7 +19,10 @@ export class GameObject {
     }
 
     onStart(scene) {
-        for (const component of this.components) {
+        const components = this.components;
+        const len = components.length;
+        for (let i = 0; i < len; i++) {
+            const component = components[i];
             if (component.onStart) {
                 component.onStart(scene);
             }
@@ -27,7 +30,10 @@ export class GameObject {
     }
 
     update(deltaTime, scene, inputManager) {
-        for (const component of this.components) {
+        const components = this.components;
+        const len = components.length;
+        for (let i = 0; i < len; i++) {
+            const component = components[i];
             if (component.update) {
                 component.update(deltaTime, scene, inputManager);
             }
@@ -36,7 +42,10 @@ export class GameObject {
 
     onCollisionEnter(other) {
         // To be called by the physics engine when a collision occurs.
-        for (const component of this.components) {
+        const components = this.components;
+        const len = components.length;
+        for (let i = 0; i < len; i++) {
+            const component = components[i];
             if (component.onCollisionEnter) {
                 component.onCollisionEnter(other);
             }
@@ -47,7 +56,10 @@ export class GameObject {
         if (this.isDestroyed) return;
 
         // Call onDestroy on all components
-        for (const component of this.components) {
+        const components = this.components;
+        const len = components.length;
+        for (let i = 0; i < len; i++) {
+            const component = components[i];
             if (component.onDestroy) {
                 component.onDestroy();
             }
