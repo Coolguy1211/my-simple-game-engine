@@ -6,6 +6,8 @@ export default class Gravity {
     constructor() {
         this.velocity = new THREE.Vector3(0, 0, 0);
         this.isGrounded = false;
+        this._floorBox = new THREE.Box3();
+        this._objectBox = new THREE.Box3();
     }
 
     onStart(scene) {
@@ -29,8 +31,11 @@ export default class Gravity {
         // by a proper physics engine and the onCollisionEnter method.
         const floor = scene.getObjectByName('floor');
         if (floor) {
-            const floorY = floor.position.y + floor.geometry.parameters.height / 2;
-            const objectHeight = this.gameObject.transform.geometry.parameters.height;
+            this._floorBox.setFromObject(floor);
+            this._objectBox.setFromObject(this.gameObject.transform);
+
+            const floorY = this._floorBox.max.y;
+            const objectHeight = this._objectBox.max.y - this._objectBox.min.y;
 
             if (this.gameObject.transform.position.y - objectHeight / 2 < floorY) {
                 this.gameObject.transform.position.y = floorY + objectHeight / 2;

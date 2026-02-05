@@ -4,11 +4,17 @@
 		<meta charset="utf-8">
 		<title>My first three.js app</title>
 		<style>
-			body { margin: 0; }
+			body { margin: 0; overflow: hidden; }
+			#c:focus-visible { outline: 3px solid #0078d4; outline-offset: -3px; }
+			@keyframes spin { to { transform: rotate(360deg); } }
 		</style>
 	</head>
 	<body>
-        <canvas id="c"></canvas>
+		<div id="loading-overlay" role="status" aria-live="polite" style="position: fixed; inset: 0; background: #101010; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-family: sans-serif; z-index: 2000; transition: opacity 0.5s ease-out;">
+			<div style="width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.1); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+			<span>Loading Universe...</span>
+		</div>
+        <canvas id="c" role="img" aria-label="3D Game Scene" tabindex="0"></canvas>
 		<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 		<script type="importmap">
 			{
