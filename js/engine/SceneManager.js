@@ -72,6 +72,11 @@ class SceneManager {
             throw error;
         } finally {
             this.isLoading = false;
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 500);
+            }
         }
     }
 
