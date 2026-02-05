@@ -64,11 +64,16 @@ async function main() {
         const { threeScene, camera } = activeScene;
         resizeRendererToDisplaySize(renderer, camera);
 
-        // The game loop now uses the TimeManager to control updates
-        gameLoop(time);
+        try {
+            // The game loop now uses the TimeManager to control updates
+            gameLoop(time);
 
-        renderer.render(threeScene, camera);
-        requestAnimationFrame(render);
+            renderer.render(threeScene, camera);
+            requestAnimationFrame(render);
+        } catch (error) {
+            console.error("Game loop crash detected:", error);
+            displayError('Application Crash', 'An unexpected error occurred during the game loop. The simulation has been stopped to prevent further issues.');
+        }
     }
 
     requestAnimationFrame(render);
