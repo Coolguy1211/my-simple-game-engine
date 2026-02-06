@@ -6,11 +6,20 @@ export default class Gravity {
     constructor() {
         this.velocity = new THREE.Vector3(0, 0, 0);
         this.isGrounded = false;
+        this._floor = null;
+        // Pre-allocate Box3 for initial height calculation.
+        this._box = new THREE.Box3();
+        this._floorY = null;
+        this._pivotOffset = null;
     }
 
     onStart(scene) {
-        // This is where we could cache references to other objects if needed,
-        // for example, the floor object.
+        // Cache the floor object reference to avoid per-frame getObjectByName calls.
+        this._floor = scene.getObjectByName('floor');
+        if (this._floor) {
+            this._box.setFromObject(this._floor);
+            this._floorY = this._box.max.y;
+        }
     }
 
     update(deltaTime, scene) {
@@ -19,21 +28,31 @@ export default class Gravity {
             this.velocity.y += GRAVITY_CONSTANT * deltaTime;
         }
 
-        // Apply velocity to the game object's transform.
-        this.gameObject.transform.position.x += this.velocity.x * deltaTime;
-        this.gameObject.transform.position.y += this.velocity.y * deltaTime;
-        this.gameObject.transform.position.z += this.velocity.z * deltaTime;
+        // Use addScaledVector for a more efficient position update.
+        this.gameObject.transform.position.addScaledVector(this.velocity, deltaTime);
 
+        // Lazily refresh floor reference if it's missing.
+        if (!this._floor) {
+            this._floor = scene.getObjectByName('floor');
+            if (this._floor) {
+                this._box.setFromObject(this._floor);
+                this._floorY = this._box.max.y;
+            }
+        }
 
-        // This is a temporary, simple collision detection that will be replaced
-        // by a proper physics engine and the onCollisionEnter method.
-        const floor = scene.getObjectByName('floor');
-        if (floor) {
-            const floorY = floor.position.y + floor.geometry.parameters.height / 2;
-            const objectHeight = this.gameObject.transform.geometry.parameters.height;
+        if (this._floorY !== null) {
+            // Robust height/pivot calculation that works with glTF models.
+            // We compute the pivot offset once to avoid expensive setFromObject() calls every frame.
+            if (this._pivotOffset === null) {
+                this._box.setFromObject(this.gameObject.transform);
+                // The distance from the pivot (position.y) to the bottom of the bounding box (min.y).
+                this._pivotOffset = this.gameObject.transform.position.y - this._box.min.y;
+            }
 
-            if (this.gameObject.transform.position.y - objectHeight / 2 < floorY) {
-                this.gameObject.transform.position.y = floorY + objectHeight / 2;
+            const objectMinY = this.gameObject.transform.position.y - this._pivotOffset;
+
+            if (objectMinY < this._floorY) {
+                this.gameObject.transform.position.y = this._floorY + this._pivotOffset;
                 this.velocity.y = 0;
                 this.isGrounded = true;
             } else {
