@@ -5,9 +5,31 @@
 		<title>My first three.js app</title>
 		<style>
 			body { margin: 0; }
+			#c {
+				width: 100vw;
+				height: 100vh;
+				display: block;
+			}
+			.loading-indicator {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				border: 4px solid #f3f3f3;
+				border-top: 4px solid #3498db;
+				border-radius: 50%;
+				width: 40px;
+				height: 40px;
+				animation: spin 2s linear infinite;
+			}
+			@keyframes spin {
+				0% { transform: translate(-50%, -50%) rotate(0deg); }
+				100% { transform: translate(-50%, -50%) rotate(360deg); }
+			}
 		</style>
 	</head>
 	<body>
+		<div id="loading-indicator" class="loading-indicator" role="status"></div>
         <canvas id="c"></canvas>
 		<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 		<script type="importmap">

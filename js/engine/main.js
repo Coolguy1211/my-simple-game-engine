@@ -8,6 +8,7 @@ import { createGameLoop } from './game-loop.js';
 async function main() {
     const canvas = document.querySelector('#c');
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+    const loadingIndicator = document.getElementById('loading-indicator');
 
     // Register all scenes
     SceneManager.registerScene('level-1', 'scenes/level-1.json');
@@ -19,6 +20,10 @@ async function main() {
         console.error("Failed to load the initial scene. The application cannot start.", error);
         displayError('Failed to Load Scene', 'The initial scene could not be loaded. Please check the console for more details and try refreshing the page.');
         return;
+    } finally {
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+        }
     }
 
     // Initialize core managers now that a scene is loaded
