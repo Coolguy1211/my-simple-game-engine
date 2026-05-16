@@ -29,6 +29,7 @@ export function displayError(title, message) {
     messageBox.style.maxWidth = '500px';
     messageBox.style.textAlign = 'center';
     messageBox.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+    messageBox.style.position = 'relative'; // Anchor for the close button
 
     // Create the title element
     const titleElement = document.createElement('h2');
@@ -43,11 +44,44 @@ export function displayError(title, message) {
     messageElement.style.color = '#333';
     messageElement.style.lineHeight = '1.5';
 
+    // --- Close Button ---
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '×';
+    closeButton.setAttribute('aria-label', 'Close');
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '15px';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.border = 'none';
+    closeButton.style.background = 'transparent';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.color = '#888';
+    closeButton.style.padding = '0';
+    closeButton.style.lineHeight = '1';
+
+    // --- Close Functionality ---
+    const closeError = () => {
+        if (document.body.contains(overlay)) {
+            document.body.removeChild(overlay);
+        }
+    };
+
+    closeButton.addEventListener('click', closeError);
+    overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) {
+            closeError();
+        }
+    });
+
     // Assemble the elements
     messageBox.appendChild(titleElement);
     messageBox.appendChild(messageElement);
+    messageBox.appendChild(closeButton); // Add the close button
     overlay.appendChild(messageBox);
 
     // Add to the body
     document.body.appendChild(overlay);
+
+    // Focus the close button for accessibility
+    closeButton.focus();
 }
