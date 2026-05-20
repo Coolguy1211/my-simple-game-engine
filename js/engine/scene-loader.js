@@ -1,4 +1,10 @@
 import * as THREE from 'three';
+
+// ⚡ Bolt: Enabled Three.js caching to boost asset loading performance.
+// By enabling the cache, we prevent the engine from re-downloading and
+// re-processing assets that are used multiple times in a scene or across
+// different scenes. This is a low-risk, high-impact optimization.
+THREE.Cache.enabled = true;
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { GameObject } from './GameObject.js';
 import { MeshRenderer } from './components/MeshRenderer.js';
